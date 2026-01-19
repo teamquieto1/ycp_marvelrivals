@@ -3,9 +3,16 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Character, Recommendation } from "../types";
 import { CHARACTERS } from "../constants";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-
 export async function getTeamRecommendation(enemyTeam: Character[]): Promise<Recommendation> {
+  // 호출 직전에 인스턴스를 생성하여 최신 API 키를 사용하도록 합니다.
+  const apiKey = process.env.API_KEY;
+  
+  if (!apiKey) {
+    return { characters: [], reasoning: "API 키가 설정되지 않았습니다. Vercel 환경 변수 설정을 확인해주세요." };
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+
   if (enemyTeam.length === 0) {
     return { characters: [], reasoning: "상대 팀을 선택해주세요." };
   }
@@ -59,8 +66,12 @@ export async function getTeamRecommendation(enemyTeam: Character[]): Promise<Rec
       characters: recommendedChars,
       reasoning: result.reasoning
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini API Error:", error);
-    return { characters: [], reasoning: "추천을 불러오는 중 오류가 발생했습니다. (API 오류)" };
+    let errorMessage = "추천을 불러오는 중 오류가 발생했습니다.";
+    if (error.message?.includes("403") || error.message?.includes("API_KEY_INVALID")) {
+      errorMessage = "API 키가 유효하지 않거나 권한이 없습니다.";
+    }
+    return { characters: [], reasoning: errorMessage };
   }
 }
