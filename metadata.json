@@ -1,0 +1,5 @@
+{
+  "name": "YCP용 마라 가위바위보",
+  "description": "마블 라이벌즈 캐릭터 카운터 가이드 앱. 상대 조합을 분석하여 최적의 팀 구성을 추천합니다.",
+  "requestFramePermissions": []
+}
